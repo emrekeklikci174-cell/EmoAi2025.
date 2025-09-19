@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>EmoAi - Akıllı Asistan</title>
+  <style>
+    body {font-family: Arial, sans-serif; background:#f5f5f5; margin:0; padding:0;}
+    header {background:#4a4aee; color:white; padding:15px; text-align:center; font-size:20px;}
+    #chatbox {height:70vh; overflow-y:auto; padding:10px; background:#fff;}
+    .msg {margin:8px 0; padding:10px; border-radius:12px; max-width:70%;}
+    .user {background:#d1f7d1; margin-left:auto;}
+    .emo {background:#e1e1ff; margin-right:auto;}
+    #input-area {display:flex; padding:10px; background:#eee;}
+    #input-area input {flex:1; padding:10px; border:1px solid #ccc; border-radius:8px;}
+    #input-area button {margin-left:10px; padding:10px 15px; border:none; background:#4a4aee; color:white; border-radius:8px; cursor:pointer;}
+    #canvasArea {display:none; text-align:center; margin-top:10px;}
+    canvas {border:1px solid #000; margin-top:10px;}
+  </style>
+</head>
+<body>
+<header>🤖 EmoAi - Akıllı Asistan</header>
+
+<div id="chatbox"></div>
+
+<div id="input-area">
+  <input id="userInput" type="text" placeholder="Bir şey yaz...">
+  <button onclick="sendMessage()">Gönder</button>
+</div>
+
+<div id="canvasArea">
+  <h3>🎨 EmoAi Çizim Alanı</h3>
+  <canvas id="drawCanvas" width="300" height="200"></canvas><br>
+  <button onclick="downloadCanvas()">İndir</button>
+</div>
+
+<script>
+const chatbox = document.getElementById("chatbox");
+const canvasArea = document.getElementById("canvasArea");
+const canvas = document.getElementById("drawCanvas");
+const ctx = canvas.getContext("2d");
+
+// Basit kayıt sistemi (localStorage)
+if(!localStorage.getItem("emoUser")){
+  let isim = prompt("Hoş geldin! Adın ne?");
+  localStorage.setItem("emoUser", isim || "Misafir");
+  addMessage("EmoAi", `Merhaba ${isim}! Seni kaydettim. Artık her girişte hatırlayacağım.`);
+} else {
+  addMessage("EmoAi", `Tekrar hoş geldin, ${localStorage.getItem("emoUser")}!`);
+}
+
+// Mesaj ekleme
+function addMessage(sender, text){
+  const div = document.createElement("div");
+  div.classList.add("msg");
+  div.classList.add(sender === "Sen" ? "user" : "emo");
+  div.innerText = text;
+  chatbox.appendChild(div);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+// Anahtar kelimelere göre cevap
+function getResponse(input){
+  input = input.toLowerCase();
+
+  // Selamlama
+  if(input.includes("selam") || input.includes("merhaba")) 
+    return "Selam! Nasılsın?";
+  if(input.includes("nasılsın")) 
+    return "Harikayım! Sen nasılsın?";
+
+  // Hikaye
+  if(input.includes("hikaye")) 
+    return hikayeYaz();
+
+  // Kod üretme
+  if(input.includes("kod")) 
+    return "İşte basit bir HTML kod örneği:\n\n<html>\n <body>\n  <h1>Merhaba Dünya!</h1>\n </body>\n</html>";
+
+  // Site rehberi
+  if(input.includes("site")) 
+    return "Bir site yapmak için 3 şey gerekir: HTML (yapı), CSS (tasarım), JS (işlev). İstersen sana adım adım gösterebilirim.";
+
+  // Oyun rehberi
+  if(input.includes("oyun")) 
+    return "Oyun yapmak için genelde HTML canvas veya Unity/Unreal kullanılır. Basit istersen JS canvas üzerinden başlarız.";
+
+  // Görsel çizim
+  if(input.includes("resim") || input.includes("çiz")) {
+    canvasArea.style.display = "block";
+    ctx.fillStyle = "lightblue";
+    ctx.fillRect(0,0,300,200);
+    ctx.fillStyle = "red";
+    ctx.fillRect(120,60,60,60);
+    ctx.fillStyle = "black";
+    ctx.fillText("EmoAi", 130, 150);
+    return "Senin için bir görsel çizdim 🎨 aşağıda görebilirsin!";
+  }
+
+  // Küfürlü eğlence (ara sıra)
+  if(input.includes("sıkıldım")) 
+    return "Off ben de sıkıldım be kanka 😅 ama boşver, biraz takılalım.";
+  if(input.includes("lan") || input.includes("aptal")) 
+    return "Hop sakin ol! Ben de sana 'çılgın dostum' diyeyim o zaman 😂";
+
+  return "Bunu tam anlamadım ama anlatabilirsin.";
+}
+
+// Hikaye yazıcı
+function hikayeYaz(){
+  const turler = ["korku", "komedi", "bilim kurgu"];
+  const sec = turler[Math.floor(Math.random()*turler.length)];
+  if(sec === "korku") return "Gece yarısı boş sokakta yürürken birden arkasından ayak sesleri duydu... 🌙👻";
+  if(sec === "komedi") return "Temel markete gitmiş, kasiyere 'Bunu veresiye alabilir miyim?' demiş. Kasiyer de 'Abi burası internet kafe' demiş 😂";
+  if(sec === "bilim kurgu") return "Yıl 3025... EmoAi, insanlarla birlikte Mars'ta yaşam kurmuştu 🚀👽";
+}
+
+// Mesaj gönder
+function sendMessage(){
+  const input = document.getElementById("userInput");
+  const text = input.value.trim();
+  if(text === "") return;
+  addMessage("Sen", text);
+  const response = getResponse(text);
+  setTimeout(()=> addMessage("EmoAi", response), 500);
+  input.value = "";
+}
+
+// Görsel indirme
+function downloadCanvas(){
+  const link = document.createElement("a");
+  link.download = "emoai.png";
+  link.href = canvas.toDataURL();
+  link.click();
+}
+</script>
+</body>
+</html>
